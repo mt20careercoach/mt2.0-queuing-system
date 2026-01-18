@@ -1,192 +1,159 @@
-# GitHub Pages Deployment Guide
+# Deployment Guide
 
-This guide walks you through deploying the Queue System frontend to GitHub Pages.
+This guide walks you through deploying the Queue System with Supabase backend.
 
 ## Prerequisites
 
-- GitHub repository with the queue system code
-- GitHub Actions enabled for your repository
-- GitHub Pages configured in repository settings
+- Supabase account and project set up (see SUPABASE_SETUP.md)
+- Vercel, Netlify, or another Next.js-compatible hosting account
+- Twilio account for SMS notifications (optional)
 
-## Automatic Deployment (Recommended)
+## Deployment Steps
 
-The repository includes a GitHub Actions workflow that automatically builds and deploys to GitHub Pages on every push to the main branch.
+### 1. Set Up Supabase Backend
 
-### Setup Steps
+Follow the [SUPABASE_SETUP.md](SUPABASE_SETUP.md) guide to:
+- Create a Supabase project
+- Set up the database schema
+- Configure environment variables
 
-1. **Enable GitHub Pages**
-   - Go to your repository Settings
-   - Navigate to "Pages" in the left sidebar
-   - Under "Build and deployment", select "GitHub Actions" as the source
+### 2. Deploy to Vercel (Recommended)
 
-2. **Push to Main Branch**
-   ```bash
-   git push origin main
-   ```
+Vercel provides the best experience for Next.js applications:
 
-3. **Monitor Deployment**
-   - Go to the "Actions" tab in your repository
-   - Watch the "Deploy to GitHub Pages" workflow
-   - Once complete, your site will be live at: `https://[username].github.io/[repo-name]`
+1. **Connect Your Repository**
+   - Go to [vercel.com](https://vercel.com)
+   - Click "Import Project"
+   - Connect your Git repository
 
-### Workflow File
+2. **Configure Environment Variables**
+   - Add your Supabase credentials:
+     ```
+     NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+     ```
+   - Add Twilio credentials (if using SMS):
+     ```
+     TWILIO_ACCOUNT_SID=your_account_sid
+     TWILIO_AUTH_TOKEN=your_auth_token
+     TWILIO_PHONE_NUMBER=your_phone_number
+     ```
 
-The workflow is already configured in `.github/workflows/deploy.yml`:
+3. **Deploy**
+   - Click "Deploy"
+   - Wait for the build to complete
+   - Your app will be live at `https://your-app.vercel.app`
 
-```yaml
-name: Deploy to GitHub Pages
+### 3. Alternative: Deploy to Netlify
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+1. **Connect Your Repository**
+   - Go to [netlify.com](https://netlify.com)
+   - Click "New site from Git"
+   - Connect your repository
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+2. **Configure Build Settings**
+   - Build command: `npm run build`
+   - Publish directory: `.next`
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build
-        run: npm run build
-      
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-```
-
-## Manual Deployment
-
-If you prefer to deploy manually:
-
-1. **Build the project locally**
-   ```bash
-   npm run build
-   ```
-
-2. **Install gh-pages package**
-   ```bash
-   npm install -D gh-pages
-   ```
-
-3. **Add deploy script to package.json**
-   ```json
-   {
-     "scripts": {
-       "deploy": "gh-pages -d out"
-     }
-   }
-   ```
+3. **Set Environment Variables**
+   - Add the same Supabase and Twilio variables as above
 
 4. **Deploy**
-   ```bash
-   npm run deploy
-   ```
+   - Click "Deploy site"
+   - Your app will be live at `https://your-app.netlify.app`
 
-## Custom Domain (Optional)
+## Custom Domain
 
 To use a custom domain:
 
-1. **Add CNAME file**
-   ```bash
-   echo "yourdomain.com" > public/CNAME
-   ```
+### For Vercel:
+1. Go to your project Settings > Domains
+2. Add your custom domain
+3. Configure DNS according to Vercel's instructions
+4. SSL certificate is automatically provisioned
 
-2. **Configure DNS**
-   - Add a CNAME record pointing to `[username].github.io`
-   - Or add A records pointing to GitHub's IP addresses
-
-3. **Enable HTTPS**
-   - Go to repository Settings > Pages
-   - Check "Enforce HTTPS"
+### For Netlify:
+1. Go to Domain settings
+2. Add your custom domain
+3. Configure DNS according to Netlify's instructions
+4. SSL certificate is automatically provisioned
 
 ## Important Notes
 
-### Static Export Limitations
+### Real-time Features
 
-Since this uses `output: 'export'` for static hosting:
-
-1. **No API Routes**: The current implementation uses client-side localStorage
-   - For production, integrate with Firebase Functions (see FIREBASE_SETUP.md)
-   
-2. **No Server-Side Rendering**: All pages are pre-rendered at build time
-
-3. **No Image Optimization**: Images are served unoptimized
-   - Use `unoptimized: true` in next.config.js (already configured)
+The application uses Supabase real-time subscriptions to automatically update the admin dashboard. This works out of the box with no additional configuration.
 
 ### Environment Variables
 
-For production deployment with Firebase:
+**Never commit `.env.local` to version control!** Always use environment variable management from your hosting platform:
 
-1. Create `.env.production` file:
-   ```env
-   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   # ... other Firebase config
-   ```
+- **Vercel**: Project Settings > Environment Variables
+- **Netlify**: Site Settings > Environment Variables
 
-2. Add GitHub Secrets:
-   - Go to Settings > Secrets and variables > Actions
-   - Add each environment variable as a secret
-   - Update the workflow to use these secrets during build
+### Database Setup
+
+Before deploying, ensure you've:
+1. Created the Supabase database schema (see SUPABASE_SETUP.md)
+2. Configured Row Level Security policies
+3. Tested the connection locally
 
 ## Troubleshooting
 
 ### Build Fails
 - Check Node.js version (requires 18+)
-- Clear cache: `rm -rf .next node_modules && npm install`
-- Review build logs in Actions tab
+- Verify environment variables are set correctly
+- Check build logs in your deployment platform
+- Clear cache and rebuild
 
-### 404 on Page Refresh
-- Ensure `.nojekyll` file exists in public directory (already included)
-- Check that GitHub Pages is set to use GitHub Actions as source
+### Database Connection Issues
+- Verify Supabase URL and anon key are correct
+- Check that database schema is created
+- Review Supabase logs for errors
+- Ensure RLS policies allow the required operations
 
-### Assets Not Loading
-- Verify `basePath` is not set in next.config.js for root deployment
-- For subdirectory deployment, add `basePath: '/repo-name'` to next.config.js
+### Real-time Not Working
+- Verify real-time is enabled in Supabase for the tickets table
+- Check browser console for WebSocket errors
+- Ensure client has proper permissions
 
-## Local Preview of Production Build
+## Local Testing
 
-To preview the production build locally:
+To test the production build locally:
 
 ```bash
+# Build the application
 npm run build
-npx serve out
+
+# Start the production server
+npm start
 ```
 
 Then open http://localhost:3000
 
+## Continuous Deployment
+
+Both Vercel and Netlify support automatic deployments:
+
+- **Push to main branch** → Automatic production deployment
+- **Push to other branches** → Preview deployments
+- **Pull requests** → Preview deployments for testing
+
+## Monitoring and Analytics
+
+### Supabase Dashboard
+- Monitor database usage
+- View real-time connections
+- Check API logs and errors
+
+### Vercel/Netlify Analytics
+- Track page views and performance
+- Monitor build times
+- View deployment history
+
 ## Updating the Deployment
 
-Simply push changes to the main branch:
+Simply push changes to your repository:
 
 ```bash
 git add .
@@ -194,4 +161,4 @@ git commit -m "Update feature"
 git push origin main
 ```
 
-The GitHub Actions workflow will automatically rebuild and redeploy.
+Your hosting platform will automatically rebuild and redeploy.
