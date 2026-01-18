@@ -13,10 +13,10 @@
   "license": "ISC",
   "description": "Modern minimalist queuing system",
   "dependencies": {
+    "@supabase/supabase-js": "^2.90.1",
     "@types/node": "^25.0.9",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
-    "firebase": "^12.8.0",
     "next": "^16.1.3",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

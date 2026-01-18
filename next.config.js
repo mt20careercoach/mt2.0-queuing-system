@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
+  // Removed 'output: export' to enable server-side features with Supabase
 }
 
 module.exports = nextConfig

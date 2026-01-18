@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { QueueManager, QueueItem } from '@/lib/queueManager';
+import { SupabaseQueueManager, QueueItemClient } from '@/lib/supabaseQueueManager';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [queue, setQueue] = useState<QueueItemClient[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,26 +22,26 @@ export default function AdminPage() {
     }
   };
 
-  const loadQueue = () => {
-    const currentQueue = QueueManager.getWaitingQueue();
+  const loadQueue = async () => {
+    const currentQueue = await SupabaseQueueManager.getWaitingQueue();
     setQueue(currentQueue);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (queue.length === 0) return;
 
     setLoading(true);
     
     try {
       const nextTicket = queue[0];
-      const followingTicket = QueueManager.callNext();
+      const followingTicket = await SupabaseQueueManager.callNext();
       
       // In production, send SMS notification here
       if (followingTicket) {
         console.log(`Would send SMS to ${followingTicket.phoneNumber}: Your turn is next! Ticket #${followingTicket.ticketNumber}`);
       }
       
-      loadQueue();
+      await loadQueue();
     } catch (err) {
       console.error('Failed to call next:', err);
     } finally {
@@ -49,12 +49,12 @@ export default function AdminPage() {
     }
   };
 
-  const handleRemove = (ticketId: string) => {
+  const handleRemove = async (ticketId: string) => {
     setLoading(true);
 
     try {
-      QueueManager.removeTicket(ticketId);
-      loadQueue();
+      await SupabaseQueueManager.removeTicket(ticketId);
+      await loadQueue();
     } catch (err) {
       console.error('Failed to remove ticket:', err);
     } finally {
@@ -65,8 +65,15 @@ export default function AdminPage() {
   useEffect(() => {
     if (isAuthenticated) {
       loadQueue();
-      const interval = setInterval(loadQueue, 2000); // Refresh every 2 seconds
-      return () => clearInterval(interval);
+      
+      // Set up real-time subscription
+      const unsubscribe = SupabaseQueueManager.subscribeToQueue((updatedQueue) => {
+        setQueue(updatedQueue);
+      });
+      
+      return () => {
+        unsubscribe();
+      };
     }
   }, [isAuthenticated]);
 

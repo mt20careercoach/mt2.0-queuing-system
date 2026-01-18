@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { QueueManager } from '@/lib/queueManager';
+import { SupabaseQueueManager } from '@/lib/supabaseQueueManager';
 
 export default function TicketPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -16,10 +16,7 @@ export default function TicketPage() {
     setError('');
 
     try {
-      // Simulate async operation
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const ticket = QueueManager.addTicket(phoneNumber);
+      const ticket = await SupabaseQueueManager.addTicket(phoneNumber);
       setTicketNumber(ticket.ticketNumber);
     } catch (err) {
       setError('Failed to get ticket. Please try again.');

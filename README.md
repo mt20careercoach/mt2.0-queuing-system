@@ -13,10 +13,10 @@ A modern minimalist queuing system built with Next.js, featuring SMS notificatio
 ## Tech Stack
 
 - **Frontend**: Next.js 14+ with App Router, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes (designed to work with Firebase Functions)
-- **Database**: Firebase Firestore/Realtime Database (mock store included)
+- **Backend**: Supabase (PostgreSQL with real-time subscriptions)
+- **Database**: Supabase PostgreSQL
 - **SMS**: Twilio (integration ready)
-- **Hosting**: GitHub Pages (frontend), Firebase (backend)
+- **Hosting**: Vercel or any Next.js-compatible platform
 
 ## Getting Started
 
@@ -24,7 +24,7 @@ A modern minimalist queuing system built with Next.js, featuring SMS notificatio
 
 - Node.js 18+ 
 - npm or yarn
-- Firebase account (for production)
+- Supabase account (for production)
 - Twilio account (for SMS notifications)
 
 ### Installation
@@ -45,7 +45,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Edit `.env.local` and add your Firebase and Twilio credentials.
+Edit `.env.local` and add your Supabase and Twilio credentials.
 
 ### Development
 
@@ -58,37 +58,32 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Building for Production
 
-Build the static site:
+Build the application:
 ```bash
 npm run build
 ```
 
-The build output will be in the `out` directory, ready for deployment to GitHub Pages.
+The build output will be ready for deployment to Vercel, Netlify, or any Next.js-compatible platform.
 
 ## Deployment
 
-### Frontend (GitHub Pages)
+### Production Deployment
 
-1. Build the project: `npm run build`
-2. Deploy the `out` directory to GitHub Pages
-3. Configure your repository settings to serve from the `gh-pages` branch or `docs` folder
+For production deployment with Supabase:
 
-### Backend (Firebase Functions)
+1. Set up Supabase project at [supabase.com](https://supabase.com)
+2. Create the database schema (see SUPABASE_SETUP.md)
+3. Configure environment variables with your Supabase credentials
+4. Set up Twilio credentials for SMS notifications
+5. Deploy to Vercel, Netlify, or your preferred Next.js hosting platform
 
-For production deployment with Firebase:
-
-1. Set up Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-2. Initialize Firebase Functions: `firebase init functions`
-3. Move API routes to Firebase Functions
-4. Configure Firestore/Realtime Database for queue storage
-5. Set up Twilio credentials in Firebase environment config
-6. Deploy: `firebase deploy`
+See [SUPABASE_SETUP.md](SUPABASE_SETUP.md) for detailed instructions.
 
 ## Admin Access
 
 Default admin password: `admin123`
 
-**Important**: Change this in production by implementing proper authentication with Firebase Auth.
+**Important**: Change this in production by implementing proper authentication with Supabase Auth.
 
 ## Project Structure
 
@@ -104,20 +99,20 @@ queue/
 │   ├── layout.tsx      # Root layout
 │   └── page.tsx        # Home page
 ├── lib/
-│   ├── firebase.ts     # Firebase configuration
-│   ├── twilio.ts       # Twilio SMS integration
-│   └── queueStore.ts   # Mock queue store
+│   ├── supabase.ts        # Supabase configuration
+│   ├── supabaseQueueManager.ts  # Queue management with Supabase
+│   └── twilio.ts          # Twilio SMS integration
 └── components/         # Reusable components
 ```
 
 ## Configuration
 
-### Firebase Setup
+### Supabase Setup
 
-1. Create a Firebase project
-2. Enable Firestore or Realtime Database
-3. Copy your Firebase config to `.env.local`
-4. Update `lib/firebase.ts` with your configuration
+1. Create a Supabase project
+2. Set up the database schema (see SUPABASE_SETUP.md)
+3. Copy your Supabase URL and anon key to `.env.local`
+4. Update `lib/supabase.ts` with your configuration
 
 ### Twilio Setup
 
@@ -128,9 +123,8 @@ queue/
 
 ## Features in Development
 
-- [ ] Firebase Authentication for admin
-- [ ] Persistent queue storage with Firestore
-- [ ] Real-time SMS notifications
+- [ ] Supabase Authentication for admin
+- [ ] Enhanced real-time notifications
 - [ ] Queue analytics and reporting
 - [ ] Multi-queue support
 - [ ] Estimated wait time calculation

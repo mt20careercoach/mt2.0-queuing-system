@@ -25,13 +25,14 @@ A modern, minimalist queuing system built with Next.js, featuring SMS notificati
    - **Framework**: Next.js 16 with App Router
    - **Language**: TypeScript for type safety
    - **Styling**: Tailwind CSS v4 with custom utility classes
-   - **State Management**: Client-side localStorage (production-ready for Firebase)
-   - **Build Output**: Static export optimized for GitHub Pages
+   - **State Management**: Supabase with real-time subscriptions
+   - **Database**: Supabase PostgreSQL
+   - **Build Output**: Optimized for modern hosting platforms
 
 ### 4. **Documentation**
    - `README.md`: Complete setup and usage guide
-   - `FIREBASE_SETUP.md`: Step-by-step Firebase backend integration
-   - `DEPLOYMENT.md`: GitHub Pages deployment instructions
+   - `SUPABASE_SETUP.md`: Step-by-step Supabase backend integration
+   - `DEPLOYMENT.md`: Deployment instructions
    - `.env.example`: Environment variable configuration template
 
 ## How It Works
@@ -51,76 +52,71 @@ A modern, minimalist queuing system built with Next.js, featuring SMS notificati
 5. Can remove tickets manually if needed
 6. Dashboard auto-refreshes to show live queue status
 
-## Current Architecture (Demo/Development)
+## Current Architecture (Development)
 
 ```
 ┌─────────────────┐
 │   Next.js App   │
-│  (Static Site)  │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│  localStorage   │
-│  (Queue Store)  │
+│    Supabase     │
+│   PostgreSQL    │
+│  (Real-time)    │
 └─────────────────┘
 ```
 
 **Features:**
-- Works completely client-side
-- No backend required
-- Perfect for demo and development
-- Can be hosted on GitHub Pages
+- Real-time database subscriptions
+- PostgreSQL backend
+- Instant updates across clients
+- Production-ready from day one
 
-## Production Architecture (Documented)
+## Production Architecture
 
 ```
 ┌─────────────────┐
 │   Next.js App   │
-│ (GitHub Pages)  │
+│   (Vercel)      │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐      ┌──────────────┐
-│ Firebase        │      │   Twilio     │
-│ Functions       │─────▶│   SMS API    │
-│ (API Backend)   │      └──────────────┘
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Firestore     │
-│  (Database)     │
+│    Supabase     │      │   Twilio     │
+│   PostgreSQL    │─────▶│   SMS API    │
+│  (Real-time)    │      └──────────────┘
+│  Edge Functions │
 └─────────────────┘
 ```
 
 **Features:**
 - Scalable cloud infrastructure
+- Real-time updates via WebSocket
 - Real SMS notifications
 - Persistent queue storage
-- Secure admin authentication
+- Secure authentication ready
 
 ## Deployment Status
 
-### ✅ Ready for GitHub Pages
-- Static export configured
-- Build successful (5 pages generated)
-- .nojekyll file included
-- GitHub Actions workflow configured
+### ✅ Ready for Production
+- Supabase integration complete
+- Real-time subscriptions enabled
+- Build successful
+- Production-ready architecture
 
-### ✅ Ready for Firebase
-- Configuration files prepared
-- Integration guide documented
-- Firebase Functions code examples provided
+### ✅ Ready for Deployment
+- Vercel/Netlify deployment ready
+- Supabase configuration documented
 - Twilio integration documented
 
 ## Key Files
 
 ### Application
-- `app/page.tsx` - Homepage (384 lines)
-- `app/ticket/page.tsx` - Ticket generation (102 lines)
-- `app/admin/page.tsx` - Admin dashboard (196 lines)
-- `lib/queueManager.ts` - Queue logic (117 lines)
+- `app/page.tsx` - Homepage
+- `app/ticket/page.tsx` - Ticket generation
+- `app/admin/page.tsx` - Admin dashboard
+- `lib/supabaseQueueManager.ts` - Queue logic with Supabase
 
 ### Configuration
 - `package.json` - Dependencies and scripts
@@ -129,9 +125,8 @@ A modern, minimalist queuing system built with Next.js, featuring SMS notificati
 - `tailwind.config.js` - Styling config
 
 ### Deployment
-- `.github/workflows/deploy.yml` - Automated deployment
-- `DEPLOYMENT.md` - Step-by-step guide
-- `FIREBASE_SETUP.md` - Backend integration
+- `SUPABASE_SETUP.md` - Backend integration guide
+- `DEPLOYMENT.md` - Step-by-step deployment guide
 
 ## Testing Results
 
@@ -148,9 +143,9 @@ All features tested and verified:
 
 ## Next Steps for Production
 
-1. **Set up Firebase Project**
-   - Create project at console.firebase.google.com
-   - Enable Firestore and Functions
+1. **Set up Supabase Project**
+   - Create project at supabase.com
+   - Set up database schema
    - Configure authentication
 
 2. **Configure Twilio**
@@ -158,18 +153,18 @@ All features tested and verified:
    - Get phone number
    - Copy credentials
 
-3. **Deploy Backend**
-   - Follow FIREBASE_SETUP.md
-   - Deploy functions
+3. **Deploy Application**
+   - Follow SUPABASE_SETUP.md
    - Set environment variables
+   - Deploy to Vercel or Netlify
 
-4. **Update Frontend**
-   - Add Firebase config to .env
-   - Update API endpoints
-   - Rebuild and deploy
+4. **Enable Features**
+   - Set up Supabase Auth
+   - Configure real-time subscriptions
+   - Enable SMS notifications
 
 5. **Go Live**
-   - Enable GitHub Pages
+   - Test all features
    - Configure custom domain (optional)
    - Monitor usage and costs
 
@@ -178,32 +173,42 @@ All features tested and verified:
 **Default Password**: `admin123`
 
 **⚠️ Important**: This is for development only. In production:
-- Use Firebase Authentication
+- Use Supabase Authentication
 - Implement role-based access control
 - Enable multi-factor authentication
 - Use secure password storage
 
 ## Cost Estimates (Production)
 
-### Firebase (Generous Free Tier)
-- Functions: 2M invocations/month free
-- Firestore: 50K reads/20K writes/day free
-- Hosting: 10GB storage, 360MB/day transfer free
+### Supabase Free Tier
+- 500MB database space
+- 5GB bandwidth
+- 2GB file storage
+- 50,000 monthly active users
+- Unlimited API requests
+
+### Supabase Pro ($25/month)
+- 8GB database space
+- 50GB bandwidth
+- 100GB file storage
+- 100,000 monthly active users
+- Daily backups
 
 ### Twilio SMS
 - US: ~$0.0075 per message
 - International: Varies by country
 - Example: 1000 SMS/month = ~$7.50
 
-### GitHub Pages
-- **Free** for public repositories
+### Vercel/Netlify
+- **Free** tier available for small projects
 - Custom domain supported
+- Automatic deployments from Git
 
 ## Support & Resources
 
-- **Documentation**: See README.md, FIREBASE_SETUP.md, DEPLOYMENT.md
+- **Documentation**: See README.md, SUPABASE_SETUP.md, DEPLOYMENT.md
 - **Next.js Docs**: https://nextjs.org/docs
-- **Firebase Docs**: https://firebase.google.com/docs
+- **Supabase Docs**: https://supabase.com/docs
 - **Twilio Docs**: https://www.twilio.com/docs
 - **Tailwind CSS**: https://tailwindcss.com/docs
 
