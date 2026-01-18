@@ -47,7 +47,7 @@ export class SupabaseQueueManager {
 
     if (error) {
       console.error('Error adding ticket:', error);
-      throw new Error('Failed to add ticket');
+      throw new Error(`Failed to add ticket: ${error.message || 'Unknown database error'}`);
     }
 
     return toClientFormat(data);
@@ -116,10 +116,11 @@ export class SupabaseQueueManager {
     // Get the ticket after this one to notify
     const followingTicket = waitingQueue.length > 1 ? waitingQueue[1] : null;
 
-    // Remove the called ticket after a short delay
+    // Remove the called ticket after a brief delay to allow UI updates
+    const TICKET_REMOVAL_DELAY_MS = 1000;
     setTimeout(async () => {
       await this.removeTicket(nextTicket.id);
-    }, 1000);
+    }, TICKET_REMOVAL_DELAY_MS);
 
     return followingTicket;
   }
